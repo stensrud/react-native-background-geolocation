@@ -259,7 +259,7 @@ enum {
             DDLogDebug(@"DistanceFilterProvider found most accurate location before timeout");
         } else if (-[aquireStartTime timeIntervalSinceNow] < maxLocationWaitTimeInSeconds) {
             // we still have time to aquire better location
-            return;
+            //return;
         }
         
         if (_config.isDebugging) {
@@ -269,16 +269,22 @@ enum {
         // We should have a good sample for speed now, power down our GPS as configured by user.
         isAcquiringSpeed = NO;
         locationManager.desiredAccuracy = _config.desiredAccuracy;
-        locationManager.distanceFilter = [self calculateDistanceFilter:[bestLocation.speed floatValue]];
+
+        if ((float)_config.distanceFilter != kCLDistanceFilterNone) {
+            locationManager.distanceFilter = [self calculateDistanceFilter:[bestLocation.speed floatValue]];
+        }
         [self startUpdatingLocation];
         
     } else if (actAsInMode == FOREGROUND) {
         // Adjust distanceFilter incrementally based upon current speed
-        float newDistanceFilter = [self calculateDistanceFilter:[bestLocation.speed floatValue]];
-        if (newDistanceFilter != locationManager.distanceFilter) {
-            DDLogInfo(@"DistanceFilterProvider updated distanceFilter, new: %f, old: %f", newDistanceFilter, locationManager.distanceFilter);
-            locationManager.distanceFilter = newDistanceFilter;
-            [self startUpdatingLocation];
+        if ((float)_config.distanceFilter != kCLDistanceFilterNone) {
+            float newDistanceFilter = [self calculateDistanceFilter:[bestLocation.speed floatValue]];
+            
+            if (newDistanceFilter != locationManager.distanceFilter) {
+                DDLogInfo(@"DistanceFilterProvider updated distanceFilter, new: %f, old: %f", newDistanceFilter, locationManager.distanceFilter);
+                locationManager.distanceFilter = newDistanceFilter;
+                [self startUpdatingLocation];
+            }
         }
     } else if ([self locationIsBeyondStationaryRegion:bestLocation]) {
         if (_config.isDebugging) {
