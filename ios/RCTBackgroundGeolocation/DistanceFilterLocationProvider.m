@@ -204,24 +204,10 @@ enum {
     Location *bestLocation = nil;
     for (CLLocation *location in locations) {
         Location *bgloc = [Location fromCLLocation:location];
-        
-        // test the age of the location measurement to determine if the measurement is cached
-        // in most cases you will not want to rely on cached measurements
-        DDLogDebug(@"Location age %f", [bgloc locationAge]);
-        if ([bgloc locationAge] > maxLocationAgeInSeconds || ![bgloc hasAccuracy] || ![bgloc hasTime]) {
-            continue;
-        }
-        
-        if (bestLocation == nil) {
-            bestLocation = bgloc;
-            continue;
-        }
-        
-        if ([bgloc isBetterLocation:bestLocation]) {
-            DDLogInfo(@"Better location found: %@", bgloc);
-            bestLocation = bgloc;
-        }
+        [super.delegate onLocationChanged:bgloc];
     }
+    
+    return;
     
     if (bestLocation == nil) {
         return;
