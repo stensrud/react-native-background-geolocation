@@ -239,13 +239,13 @@ RCT_EXPORT_METHOD(getConfig:(RCTResponseSenderBlock)success failure:(RCTResponse
 -(void) onResume:(NSNotification *)notification
 {
     RCTLogInfo(@"CDVBackgroundGeoLocation resumed");
-    [locationManager switchMode:FOREGROUND];
+    //[locationManager switchMode:FOREGROUND];
 }
 
 -(void) onPause:(NSNotification *)notification
 {
     RCTLogInfo(@"CDVBackgroundGeoLocation paused");
-    [locationManager switchMode:BACKGROUND];
+    //[locationManager switchMode:BACKGROUND];
 }
 
 /**@
