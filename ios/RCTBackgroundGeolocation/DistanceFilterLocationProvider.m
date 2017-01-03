@@ -123,9 +123,9 @@ enum {
         // it's neccessary to start call startUpdatingLocation in iOS < 8.0 to show user prompt!
         
         if (authStatus == kCLAuthorizationStatusNotDetermined) {
-            if ([locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {  //iOS 8.0+
-                DDLogVerbose(@"DistanceFilterProvider requestAlwaysAuthorization");
-                [locationManager requestAlwaysAuthorization];
+            if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {  //iOS 8.0+
+                DDLogVerbose(@"DistanceFilterProvider requestWhenInUseAuthorization");
+                [locationManager requestWhenInUseAuthorization];
             }
         }
 #endif
@@ -370,6 +370,7 @@ enum {
                 [self.delegate onAuthorizationChanged:DENIED];
             }
             break;
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
         case kCLAuthorizationStatusAuthorizedAlways:
             if (self.delegate && [self.delegate respondsToSelector:@selector(onAuthorizationChanged:)]) {
                 [self.delegate onAuthorizationChanged:ALLOWED];
