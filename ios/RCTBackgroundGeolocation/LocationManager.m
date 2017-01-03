@@ -297,7 +297,8 @@ static NSString * const Domain = @"com.marianhello";
         }
         // retrieve first queued location
         location = [locationQueue firstObject];
-        [locationQueue removeObject:location];
+        //        [locationQueue removeObject:location];
+        [locationQueue removeObjectAtIndex:0];
     }
 
     // Create a background-task and delegate to Javascript for syncing location
