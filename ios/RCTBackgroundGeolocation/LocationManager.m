@@ -33,19 +33,19 @@ static NSString * const Domain = @"com.marianhello";
 @implementation LocationManager {
     BOOL isStarted;
     BOOL hasConnectivity;
-
+    
     BGOperationMode operationMode;
     //    BOOL shouldStart; //indicating intent to start service, but we're waiting for user permission
-
+    
     UILocalNotification *localNotification;
-
+    
     NSNumber *maxBackgroundHours;
     UIBackgroundTaskIdentifier bgTask;
     NSDate *lastBgTaskAt;
-
+    
     // configurable options
     Config *_config;
-
+    
     Location *stationaryLocation;
     NSMutableArray *locationQueue;
     AbstractLocationProvider<LocationProvider> *locationProvider;
@@ -57,11 +57,11 @@ static NSString * const Domain = @"com.marianhello";
 - (id) init
 {
     self = [super init];
-
+    
     if (self == nil) {
         return self;
     }
-
+    
     reach = [Reachability reachabilityWithHostname:@"www.google.com"];
     reach.reachableBlock = ^(Reachability *_reach){
         // keep in mind this is called on a background thread
@@ -407,8 +407,8 @@ static NSString * const Domain = @"com.marianhello";
     DDLogDebug(@"LocationManager#onLocationChanged %@", location);
     stationaryLocation = nil;
     
-    SQLiteLocationDAO* locationDAO = [SQLiteLocationDAO sharedInstance];
-    location.id = [locationDAO persistLocation:location limitRows:_config.maxLocations];
+    //SQLiteLocationDAO* locationDAO = [SQLiteLocationDAO sharedInstance];
+    //location.id = [locationDAO persistLocation:location limitRows:_config.maxLocations];
     
     @synchronized(self) {
         [locationQueue addObject:location];
