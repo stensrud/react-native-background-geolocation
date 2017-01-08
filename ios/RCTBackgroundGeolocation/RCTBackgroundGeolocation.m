@@ -6,7 +6,7 @@
 //  Copyright © 2016 mauron85. All rights reserved.
 //
 
-#import <React/RCTBackgroundGeolocation.h>
+#import "RCTBackgroundGeolocation.h"
 #import <React/RCTLog.h>
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
