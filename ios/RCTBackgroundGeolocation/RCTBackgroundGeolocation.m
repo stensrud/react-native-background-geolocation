@@ -6,10 +6,10 @@
 //  Copyright © 2016 mauron85. All rights reserved.
 //
 
-#import "RCTBackgroundGeolocation.h"
-#import "RCTLog.h"
-#import "RCTBridge.h"
-#import "RCTEventDispatcher.h"
+#import <React/RCTBackgroundGeolocation.h>
+#import <React/RCTLog.h>
+#import <React/RCTBridge.h>
+#import <React/RCTEventDispatcher.h>
 #import "Logging.h"
 
 #define isNull(value) value == nil || [value isKindOfClass:[NSNull class]]
