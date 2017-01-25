@@ -6,7 +6,7 @@ const RNBackgroundGeolocation = NativeModules.BackgroundGeolocation;
 function emptyFn() {}
 
 var BackgroundGeolocation = {
-  events: ['location', 'stationary', 'error'],
+  events: ['location', 'stationary', 'error', 'locations'],
 
   provider: {
     ANDROID_DISTANCE_FILTER_PROVIDER: 0,
