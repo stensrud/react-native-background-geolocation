@@ -28,8 +28,8 @@ RCT_EXPORT_MODULE();
 {
     self = [super init];
     if (self) {
-        [DDLog addLogger:[DDASLLogger sharedInstance] withLevel:DDLogLevelInfo];
-        [DDLog addLogger:[DDTTYLogger sharedInstance] withLevel:DDLogLevelDebug];
+        //[DDLog addLogger:[DDASLLogger sharedInstance] withLevel:DDLogLevelInfo];
+        //[DDLog addLogger:[DDTTYLogger sharedInstance] withLevel:DDLogLevelDebug];
         
         sqliteLogger = [[FMDBLogger alloc] initWithLogDirectory:[self loggerDirectory]];
         sqliteLogger.saveThreshold     = 1;
@@ -38,7 +38,7 @@ RCT_EXPORT_MODULE();
         sqliteLogger.deleteInterval    = 60 * 60 * 24;     //  1 day
         sqliteLogger.deleteOnEverySave = NO;
         
-        [DDLog addLogger:sqliteLogger withLevel:DDLogLevelDebug];
+        //[DDLog addLogger:sqliteLogger withLevel:DDLogLevelDebug];
 
         locationManager = [[LocationManager alloc] init];
         locationManager.delegate = self;
@@ -221,6 +221,12 @@ RCT_EXPORT_METHOD(getConfig:(RCTResponseSenderBlock)success failure:(RCTResponse
     [self sendEvent:@"location" resultAsDictionary:[location toDictionary]];
 }
 
+- (void) onLocationsChanged:(NSArray*)locations
+{
+    RCTLogInfo(@"RCTBackgroundGeolocation onLocationsChanged");
+    [self sendEvent:@"locations" resultAsArray:locations];
+}
+
 - (void) onStationaryChanged:(Location*)location
 {
     RCTLogInfo(@"RCTBackgroundGeolocation onStationaryChanged");
@@ -239,13 +245,13 @@ RCT_EXPORT_METHOD(getConfig:(RCTResponseSenderBlock)success failure:(RCTResponse
 -(void) onResume:(NSNotification *)notification
 {
     RCTLogInfo(@"CDVBackgroundGeoLocation resumed");
-    //[locationManager switchMode:FOREGROUND];
+    [locationManager switchMode:FOREGROUND];
 }
 
 -(void) onPause:(NSNotification *)notification
 {
     RCTLogInfo(@"CDVBackgroundGeoLocation paused");
-    //[locationManager switchMode:BACKGROUND];
+    [locationManager switchMode:BACKGROUND];
 }
 
 /**@

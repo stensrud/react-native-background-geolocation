@@ -354,6 +354,7 @@ static NSString * const Domain = @"com.marianhello";
 - (void) sync:(Location*)location
 {
     DDLogInfo(@"LocationManager#sync %@", location);
+    /*
     if (_config.isDebugging) {
         [self notify:[NSString stringWithFormat:@"Location update: %s\nSPD: %0.0f | DF: %ld | ACY: %0.0f",
             ((operationMode == FOREGROUND) ? "FG" : "BG"),
@@ -363,6 +364,15 @@ static NSString * const Domain = @"com.marianhello";
         ]];
 
         AudioServicesPlaySystemSound (locationSyncSound);
+    }
+    */
+
+    if ([location isKindOfClass:[NSArray class]]) {
+        // Build a resultset for javascript callback.
+        if (self.delegate && [self.delegate respondsToSelector:@selector(onLocationsChanged:)]) {
+            [self.delegate onLocationsChanged:location];
+        }
+        return;
     }
 
     // Build a resultset for javascript callback.
@@ -415,6 +425,21 @@ static NSString * const Domain = @"com.marianhello";
         [locationQueue addObject:location];
     }
 
+    [self flushQueue];
+}
+
+- (void) onLocationsChanged:(NSArray *)locations
+{
+    DDLogDebug(@"LocationManager#onLocationsChanged %@", locations);
+    stationaryLocation = nil;
+    
+    //SQLiteLocationDAO* locationDAO = [SQLiteLocationDAO sharedInstance];
+    //location.id = [locationDAO persistLocation:location limitRows:_config.maxLocations];
+    
+    @synchronized(self) {
+        [locationQueue addObject:locations];
+    }
+    
     [self flushQueue];
 }
 
