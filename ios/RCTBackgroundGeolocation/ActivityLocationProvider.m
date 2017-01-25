@@ -44,7 +44,7 @@ static NSString * const Domain = @"com.marianhello";
     locationManager = [[CLLocationManager alloc] init];
     
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) {
-        DDLogDebug(@"DistanceFilterProvider iOS9 detected");
+        DDLogDebug(@"ActivityLocationProvider iOS9 detected");
         locationManager.allowsBackgroundLocationUpdates = YES;
     }
     
@@ -67,7 +67,7 @@ static NSString * const Domain = @"com.marianhello";
  */
 - (BOOL) configure:(Config*)config error:(NSError * __autoreleasing *)outError
 {
-    DDLogVerbose(@"DistanceFilterProvider configure");
+    DDLogVerbose(@"ActivityLocationProvider configure");
     _config = config;
     
     locationManager.pausesLocationUpdatesAutomatically = _config.pauseLocationUpdates;
@@ -85,7 +85,7 @@ static NSString * const Domain = @"com.marianhello";
  */
 - (BOOL) start:(NSError * __autoreleasing *)outError
 {
-    DDLogInfo(@"DistanceFilterProvider will start");
+    DDLogInfo(@"ActivityLocationProvider will start");
     
     NSUInteger authStatus;
     
@@ -117,7 +117,7 @@ static NSString * const Domain = @"com.marianhello";
         
         if (authStatus == kCLAuthorizationStatusNotDetermined) {
             if ([locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {  //iOS 8.0+
-                DDLogVerbose(@"DistanceFilterProvider requestWhenInUseAuthorization");
+                DDLogVerbose(@"ActivityLocationProvider requestWhenInUseAuthorization");
                 [locationManager requestWhenInUseAuthorization];
             }
         }
@@ -134,7 +134,7 @@ static NSString * const Domain = @"com.marianhello";
  */
 - (BOOL) stop:(NSError * __autoreleasing *)outError
 {
-    DDLogInfo(@"DistanceFilterProvider stop");
+    DDLogInfo(@"ActivityLocationProvider stop");
     
     [self stopUpdatingLocation];
     
@@ -146,13 +146,11 @@ static NSString * const Domain = @"com.marianhello";
  */
 - (void) switchMode:(BGOperationMode)mode
 {
-    DDLogInfo(@"DistanceFilterProvider switchMode %lu", (unsigned long)mode);
+    DDLogInfo(@"ActivityLocationProvider switchMode %lu", (unsigned long)mode);
     
     operationMode = mode;
     
     aquireStartTime = [NSDate date];
-    
-    NSLog(@"Buffer length %d", locationBuffer.count);
     
     if (locationBuffer.count > 0) {
         [super.delegate onLocationsChanged:locationBuffer];
@@ -169,14 +167,13 @@ static NSString * const Domain = @"com.marianhello";
 
 - (void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    DDLogDebug(@"DistanceFilterProvider didUpdateLocations (operationMode: %lu)", (unsigned long)operationMode);
+    DDLogDebug(@"ActivityLocationProvider didUpdateLocations (operationMode: %lu)", (unsigned long)operationMode);
     Location *bgloc;
     CLLocation *location;
     
     switch (operationMode) {
         case BACKGROUND:
             for (location in locations) {
-                NSLog(@"Buffering location");
                 [locationBuffer addObject:[[Location fromCLLocation:location] toDictionary]];
             }
             break;
@@ -195,7 +192,7 @@ static NSString * const Domain = @"com.marianhello";
 
 - (void) locationManagerDidPauseLocationUpdates:(CLLocationManager *)manager
 {
-    DDLogDebug(@"DistanceFilterProvider location updates paused");
+    DDLogDebug(@"ActivityLocationProvider location updates paused");
     if (_config.isDebugging) {
         [self notify:@"Location updates paused"];
     }
@@ -203,7 +200,7 @@ static NSString * const Domain = @"com.marianhello";
 
 - (void) locationManagerDidResumeLocationUpdates:(CLLocationManager *)manager
 {
-    DDLogDebug(@"DistanceFilterProvider location updates resumed");
+    DDLogDebug(@"ActivityLocationProvider location updates resumed");
     if (_config.isDebugging) {
         [self notify:@"Location updates resumed b"];
     }
@@ -211,7 +208,7 @@ static NSString * const Domain = @"com.marianhello";
 
 - (void) locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
-    DDLogError(@"DistanceFilterProvider didFailWithError: %@", error);
+    DDLogError(@"ActivityLocationProvider didFailWithError: %@", error);
     if (_config.isDebugging) {
         AudioServicesPlaySystemSound (locationErrorSound);
         [self notify:[NSString stringWithFormat:@"Location error: %@", error.localizedDescription]];
