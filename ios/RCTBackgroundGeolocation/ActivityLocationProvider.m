@@ -122,6 +122,14 @@ static NSString * const Domain = @"com.marianhello";
             }
         }
 #endif
+        
+        // On iOS 9+ we also need to enable background updates
+        NSArray *backgroundModes  = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
+        if(backgroundModes && [backgroundModes containsObject:@"location"]) {
+            if([locationManager respondsToSelector:@selector(setAllowsBackgroundLocationUpdates:)]) {
+                [locationManager setAllowsBackgroundLocationUpdates:YES];
+            }
+        }
     }
     
     [self switchMode:FOREGROUND];
