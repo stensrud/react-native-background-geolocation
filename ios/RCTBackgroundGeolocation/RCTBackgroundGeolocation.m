@@ -38,7 +38,7 @@ RCT_EXPORT_MODULE();
         sqliteLogger.deleteInterval    = 60 * 60 * 24;     //  1 day
         sqliteLogger.deleteOnEverySave = NO;
         
-        //[DDLog addLogger:sqliteLogger withLevel:DDLogLevelDebug];
+        [DDLog addLogger:sqliteLogger withLevel:DDLogLevelDebug];
 
         locationManager = [[LocationManager alloc] init];
         locationManager.delegate = self;
