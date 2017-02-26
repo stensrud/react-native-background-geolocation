@@ -559,7 +559,11 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
                 if (currentActivity != null) { //workaround for issue RN #9791
                     // not unbinding from service will cause ServiceConnectionLeaked
                     // but there is not much we can do about it now
-                    currentActivity.unbindService(mConnection);
+                    try {
+                        currentActivity.unbindService(mConnection);
+                    } catch (Exception e) {
+                        log.warn("Error unbinding activity", e.toString());
+                    }
                 }
 
                 mIsBound = false;
