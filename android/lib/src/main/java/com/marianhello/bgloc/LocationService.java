@@ -111,7 +111,7 @@ public class LocationService extends Service {
     private static final int FIVE_MINUTES = 1000 * 60 * 5;
 
     private LocationDAO dao;
-    private Config config;
+    private Config config = null;
     private LocationProvider provider;
     private Account syncAccount;
     private Boolean hasConnectivity = true;
@@ -211,11 +211,13 @@ public class LocationService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         log.debug("Task has been removed");
-        if (config.getStopOnTerminate()) {
-            log.info("Stopping self");
-            stopSelf();
-        } else {
-            log.info("Continue running in background");
+        if (config != null) {
+            if (config.getStopOnTerminate()) {
+                log.info("Stopping self");
+                stopSelf();
+            } else {
+                log.info("Continue running in background");
+            }
         }
         super.onTaskRemoved(rootIntent);
     }
