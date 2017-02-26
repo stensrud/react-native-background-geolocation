@@ -52,6 +52,7 @@ import javax.annotation.Nullable;
 public class BackgroundGeolocationModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
     public static final String LOCATION_EVENT = "location";
+    public static final String LOCATIONS_EVENT = "locations";
     public static final String STATIONARY_EVENT = "stationary";
     public static final String ERROR_EVENT = "error";
     private static final Integer MESSENGER_CLIENT_ID = 666;
@@ -87,11 +88,22 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
 
     @Override
     public void onHostResume() {
+        Message msg = Message.obtain(null,
+                LocationService.MSG_ON_RESUME);
+        msg.replyTo = mMessenger;
+        msg.arg1 = MESSENGER_CLIENT_ID;
+        mService.send(msg);
+
         log.info("App will be resumed");
     }
 
     @Override
     public void onHostPause() {
+        Message msg = Message.obtain(null,
+                LocationService.MSG_ON_PAUSE);
+        msg.replyTo = mMessenger;
+        msg.arg1 = MESSENGER_CLIENT_ID;
+        mService.send(msg);
         log.info("App will be paused");
     }
 
@@ -115,6 +127,41 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case LocationService.MSG_LOCATIONS_UPDATE:
+                    try {
+                        log.debug("Sending locations to webview");
+                        Bundle bundle = msg.getData();
+                        bundle.setClassLoader(LocationService.class.getClassLoader());
+
+                        WritableArray outArray = Arguments.createArray();
+                        List<BackgroundLocation> locations = (List<BackgroundLocation>) bundle.getParcelable("locations");
+
+                        for (BackgroundLocation location : locations) {
+                            Integer locationProvider = location.getLocationProvider();
+                            WritableMap out = Arguments.createMap();
+                            if (locationProvider != null) out.putInt("locationProvider", locationProvider);
+                            out.putDouble("time", new Long(location.getTime()).doubleValue());
+                            out.putDouble("latitude", location.getLatitude());
+                            out.putDouble("longitude", location.getLongitude());
+                            out.putDouble("accuracy", location.getAccuracy());
+                            out.putDouble("speed", location.getSpeed());
+                            out.putDouble("altitude", location.getAltitude());
+                            out.putDouble("bearing", location.getBearing());
+                            outArray.pushMap(out);
+                        }
+
+                        sendEvent(getReactApplicationContext(), LOCATIONS_EVENT, outArray);
+                    } catch (Exception e) {
+                        log.warn("Error converting message to json");
+
+                        WritableMap out = Arguments.createMap();
+                        out.putString("message", "Error converting message to json");
+                        out.putString("detail", e.getMessage());
+
+                        sendEvent(getReactApplicationContext(), ERROR_EVENT, out);
+                    }
+
+                    break;
                 case LocationService.MSG_LOCATION_UPDATE:
                     try {
                         log.debug("Sending location to webview");

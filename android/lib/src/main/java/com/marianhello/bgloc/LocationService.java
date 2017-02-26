@@ -95,6 +95,9 @@ public class LocationService extends Service {
      */
     public static final int MSG_SWITCH_MODE = 6;
 
+    public static final int MSG_ON_PAUSE = 7;
+    public static final int MSG_ON_RESUME = 8;
+    public static final int MSG_LOCATIONS_UPDATE = 9;
 
     /** background operation mode of location provider */
     public static final int BACKGROUND_MODE = 0;
@@ -110,6 +113,8 @@ public class LocationService extends Service {
     private LocationProvider provider;
     private Account syncAccount;
     private Boolean hasConnectivity = true;
+    private Boolean isPaused = false;
+    private List<BackgroundLocation> locationBuffer = new ArrayList<BackgroundLocation>();
 
     private org.slf4j.Logger log;
 
@@ -141,6 +146,13 @@ public class LocationService extends Service {
                     break;
                 case MSG_SWITCH_MODE:
                     switchMode(msg.arg1);
+                    break;
+                case MSG_ON_PAUSE:
+                    isPaused = true;
+                    break;
+                case MSG_ON_RESUME:
+                    clearBuffer();
+                    isPaused = false;
                     break;
                 default:
                     super.handleMessage(msg);
@@ -304,6 +316,20 @@ public class LocationService extends Service {
         provider.stopRecording();
     }
 
+    private void clearBuffer() {
+        List<BackgroundLocation> currentBuffer = locationBuffer;
+        if (currentBuffer.size() > 0) {
+            log.debug("Clearing location buffer, size {}", currentBuffer.size());
+            locationBuffer = new ArrayList<BackgroundLocation>();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("locations", currentBuffer);
+            Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATE);
+            msg.setData(bundle);
+            sendClientMessage(msg);
+        } else {
+            log.debug("Location buffer empty when cleaning");
+        }
+    }
 
     /**
      * Handle location from location location provider
@@ -322,7 +348,7 @@ public class LocationService extends Service {
      * @param location
      */
     public void handleLocation(BackgroundLocation location) {
-        log.debug("New location {}", location.toString());
+        log.debug("New location {} isPaused {}", location.toString(), isPaused);
 
         location.setBatchStartMillis(System.currentTimeMillis() + ONE_MINUTE); // prevent sync of not yet posted location
         persistLocation(location);
@@ -340,12 +366,16 @@ public class LocationService extends Service {
             postLocationAsync(location);
         }
 
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("location", location);
-        Message msg = Message.obtain(null, MSG_LOCATION_UPDATE);
-        msg.setData(bundle);
-
-        sendClientMessage(msg);
+        if (isPaused) {
+            log.debug("Adding location to buffer");
+            locationBuffer.add(location);
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("location", location);
+            Message msg = Message.obtain(null, MSG_LOCATION_UPDATE);
+            msg.setData(bundle);
+            sendClientMessage(msg);
+        }
     }
 
     public void handleStationary(BackgroundLocation location) {
