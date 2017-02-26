@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 
 import com.marianhello.bgloc.data.BackgroundLocation;
+import com.marianhello.bgloc.data.BackgroundLocations;
 import com.marianhello.bgloc.data.ConfigurationDAO;
 import com.marianhello.bgloc.data.DAOFactory;
 import com.marianhello.bgloc.data.LocationDAO;
@@ -50,6 +51,7 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 public class LocationService extends Service {
 
@@ -114,7 +116,7 @@ public class LocationService extends Service {
     private Account syncAccount;
     private Boolean hasConnectivity = true;
     private Boolean isPaused = false;
-    private List<BackgroundLocation> locationBuffer = new ArrayList<BackgroundLocation>();
+    private BackgroundLocations locationBuffer = new BackgroundLocations();
 
     private org.slf4j.Logger log;
 
@@ -317,10 +319,10 @@ public class LocationService extends Service {
     }
 
     private void clearBuffer() {
-        List<BackgroundLocation> currentBuffer = locationBuffer;
-        if (currentBuffer.size() > 0) {
-            log.debug("Clearing location buffer, size {}", currentBuffer.size());
-            locationBuffer = new ArrayList<BackgroundLocation>();
+        BackgroundLocations currentBuffer = locationBuffer;
+        if (currentBuffer.locations.size() > 0) {
+            log.debug("Clearing location buffer, size {}", currentBuffer.locations.size());
+            locationBuffer = new BackgroundLocations();
             Bundle bundle = new Bundle();
             bundle.putParcelable("locations", currentBuffer);
             Message msg = Message.obtain(null, MSG_LOCATIONS_UPDATE);
@@ -368,7 +370,7 @@ public class LocationService extends Service {
 
         if (isPaused) {
             log.debug("Adding location to buffer");
-            locationBuffer.add(location);
+            locationBuffer.locations.add(location);
         } else {
             Bundle bundle = new Bundle();
             bundle.putParcelable("location", location);

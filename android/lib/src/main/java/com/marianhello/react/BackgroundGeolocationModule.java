@@ -33,6 +33,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.marianhello.bgloc.Config;
 import com.marianhello.bgloc.LocationService;
 import com.marianhello.bgloc.data.BackgroundLocation;
+import com.marianhello.bgloc.data.BackgroundLocations;
 import com.marianhello.bgloc.data.ConfigurationDAO;
 import com.marianhello.bgloc.data.DAOFactory;
 import com.marianhello.bgloc.data.LocationDAO;
@@ -88,23 +89,32 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
 
     @Override
     public void onHostResume() {
+        log.info("App will be resumed");
+        if (!mIsBound) return;
         Message msg = Message.obtain(null,
                 LocationService.MSG_ON_RESUME);
         msg.replyTo = mMessenger;
         msg.arg1 = MESSENGER_CLIENT_ID;
-        mService.send(msg);
-
-        log.info("App will be resumed");
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            log.warn("RemoteException on resume {}", e.toString());
+        }
     }
 
     @Override
     public void onHostPause() {
+        log.info("App will be paused");
+        if (!mIsBound) return;
         Message msg = Message.obtain(null,
                 LocationService.MSG_ON_PAUSE);
         msg.replyTo = mMessenger;
         msg.arg1 = MESSENGER_CLIENT_ID;
-        mService.send(msg);
-        log.info("App will be paused");
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            log.warn("RemoteException on pause {}", e.toString());
+        }
     }
 
     @Override
@@ -134,9 +144,9 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
                         bundle.setClassLoader(LocationService.class.getClassLoader());
 
                         WritableArray outArray = Arguments.createArray();
-                        List<BackgroundLocation> locations = (List<BackgroundLocation>) bundle.getParcelable("locations");
+                        BackgroundLocations locations = (BackgroundLocations) bundle.getParcelable("locations");
 
-                        for (BackgroundLocation location : locations) {
+                        for (BackgroundLocation location : locations.locations) {
                             Integer locationProvider = location.getLocationProvider();
                             WritableMap out = Arguments.createMap();
                             if (locationProvider != null) out.putInt("locationProvider", locationProvider);
@@ -150,7 +160,10 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
                             outArray.pushMap(out);
                         }
 
-                        sendEvent(getReactApplicationContext(), LOCATIONS_EVENT, outArray);
+                        WritableMap outMap = Arguments.createMap();
+                        outMap.putArray("locations", outArray);
+
+                        sendEvent(getReactApplicationContext(), LOCATIONS_EVENT, outMap);
                     } catch (Exception e) {
                         log.warn("Error converting message to json");
 
