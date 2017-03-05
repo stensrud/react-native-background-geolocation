@@ -167,9 +167,9 @@ static NSString * const Domain = @"com.marianhello";
     }
 
     // Crank up the GPS power temporarily to get a good fix on our current location
-    [self stopUpdatingLocation];
-    locationManager.distanceFilter = kCLDistanceFilterNone;
-    locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
+//    [self stopUpdatingLocation];
+//    locationManager.distanceFilter = kCLDistanceFilterNone;
+//    locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
     [self startUpdatingLocation];
 }
 
